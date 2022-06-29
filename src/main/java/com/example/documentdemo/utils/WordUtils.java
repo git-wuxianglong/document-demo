@@ -128,7 +128,6 @@ public class WordUtils {
             }
             License asposeLicense = new License();
             asposeLicense.setLicense(is);
-            System.out.println("Aspose isLicensed: " + asposeLicense.isLicensed());
             is.close();
         } catch (Exception e) {
             e.printStackTrace();

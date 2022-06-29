@@ -47,6 +47,13 @@
 			<scope>system</scope>
 			<systemPath>${project.basedir}/lib/aspose-words-19.1.jar</systemPath>
 		</dependency>
+		<dependency>
+			<groupId>com.aspose</groupId>
+			<artifactId>aspose-pdf</artifactId>
+			<version>21.11</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/aspose-pdf-21.11.jar</systemPath>
+		</dependency>
 
 	</dependencies>
 
