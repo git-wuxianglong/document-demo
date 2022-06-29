@@ -15,8 +15,8 @@ public class PdfUtils {
 
     public static void main(String[] args) {
         checkLicense();
-        String inPath = "C:\\Users\\wuxianglong\\Desktop\\test.pdf";
-        String outPath = "C:\\Users\\wuxianglong\\Desktop\\test.html";
+        String inPath = "C:\\Users\\xxxx\\Desktop\\test.pdf";
+        String outPath = "C:\\Users\\xxxx\\Desktop\\test.html";
         pdfToHtml(inPath, outPath);
     }
 
