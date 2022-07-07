@@ -64,7 +64,7 @@ public class WordUtils {
         Document wordDoc = new Document(inPath);
         DocumentBuilder builder = new DocumentBuilder(wordDoc);
         for (Field field : wordDoc.getRange().getFields()) {
-            if (FORM_TEXT.contains(field.getFieldCode())) {
+            if (field.getFieldCode().contains(FORM_TEXT)) {
                 // 去除掉文字型窗体域
                 builder.moveToField(field, true);
                 builder.write(field.getResult());
