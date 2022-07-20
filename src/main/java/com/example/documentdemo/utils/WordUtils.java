@@ -1,12 +1,18 @@
 package com.example.documentdemo.utils;
 
+
 import com.aspose.words.*;
 import com.google.common.collect.ImmutableMap;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageInputStream;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,9 +34,8 @@ public class WordUtils {
 
     public static void main(String[] args) throws Exception {
         checkLicense();
-        String inPath = "";
-        String outPath = "";
-        docToHtml(inPath, outPath);
+        String inPath = "C:\\Users\\username\\Desktop\\test.docx";
+        String outPath = "C:\\Users\\username\\Desktop\\test.html";
     }
 
     /**
@@ -99,22 +104,108 @@ public class WordUtils {
      * @param outPath 输出文件路径
      * @throws Exception 操作异常
      */
-    public void docToPdf(String inPath, String outPath) throws Exception {
+    public static void docToPdf(String inPath, String outPath) throws Exception {
         long start = System.currentTimeMillis();
         log.info("WORD转PDF保存路径:{}", outPath);
-        File file = new File(outPath);
-        FileOutputStream os = new FileOutputStream(file);
-        if (!System.getProperty(OS_NAME_STR).toLowerCase().startsWith(WINDOWS_STR)) {
-            // linux 需要配置字体库
-            log.info("【WordUtils -> docToPdf】linux字体库文件路径:{}", LINUX_FONTS_PATH);
-            FontSettings.getDefaultInstance().setFontsFolder(LINUX_FONTS_PATH, false);
-        }
+        FileOutputStream os = getFileOutputStream(outPath);
         // 读原始文档
         Document doc = new Document(inPath);
         // 转 pdf
         doc.save(os, SaveFormat.PDF);
         os.close();
         log.info("WORD转PDF成功，耗时：{}", System.currentTimeMillis() - start);
+    }
+
+    /**
+     * word转pdf
+     *
+     * @param inputStream 文件输入流
+     * @param outPath     输出文件路径
+     * @throws Exception 操作异常
+     */
+    public static void docToPdf(InputStream inputStream, String outPath) throws Exception {
+        FileOutputStream os = getFileOutputStream(outPath);
+        Document doc = new Document(inputStream);
+        doc.save(os, SaveFormat.PDF);
+        os.close();
+    }
+
+    public static FileOutputStream getFileOutputStream(String outPath) throws FileNotFoundException {
+        if (!System.getProperty(OS_NAME_STR).toLowerCase().startsWith(WINDOWS_STR)) {
+            // linux 需要配置字体库
+            log.info("【WordUtils -> docToPdf】linux字体库文件路径:{}", LINUX_FONTS_PATH);
+            FontSettings.getDefaultInstance().setFontsFolder(LINUX_FONTS_PATH, false);
+        }
+        return new FileOutputStream(outPath);
+    }
+
+    /**
+     * word转换为图片，每页一张图片
+     *
+     * @param inPath word文件路径
+     * @throws Exception 操作异常
+     */
+    public static void docToImage(String inPath) throws Exception {
+        InputStream inputStream = Files.newInputStream(Paths.get(inPath));
+        File file = new File(inPath);
+        String name = file.getName();
+        String fileName = name.substring(0, name.lastIndexOf("."));
+        String parent = file.getParent();
+        log.info("parent:{}", parent);
+        boolean mkdir = new File(parent + "/" + fileName).mkdir();
+        log.info("mkdir:{}", mkdir);
+        List<BufferedImage> bufferedImages = wordToImg(inputStream);
+        for (int i = 0; i < bufferedImages.size(); i++) {
+            ImageIO.write(bufferedImages.get(i), "png", new File(parent + "/" + fileName + "/" + "第" + i + "页" + fileName + ".png"));
+        }
+        inputStream.close();
+    }
+
+    /**
+     * word转换为图片，合并为一张图片
+     *
+     * @param inPath word文件路径
+     * @throws Exception 操作异常
+     */
+    public static void docToOneImage(String inPath) throws Exception {
+        InputStream inputStream = Files.newInputStream(Paths.get(inPath));
+        File file = new File(inPath);
+        String name = file.getName();
+        String fileName = name.substring(0, name.lastIndexOf("."));
+        String parent = file.getParent();
+        List<BufferedImage> bufferedImages = wordToImg(inputStream);
+        // 合并为一张图片
+        BufferedImage image = MergeImage.mergeImage(false, bufferedImages);
+        ImageIO.write(image, "png", new File(parent + "/" + fileName + ".png"));
+        inputStream.close();
+    }
+
+    private static List<BufferedImage> wordToImg(InputStream inputStream) throws Exception {
+        Document doc = new Document(inputStream);
+        ImageSaveOptions options = new ImageSaveOptions(SaveFormat.PNG);
+        options.setPrettyFormat(true);
+        options.setUseAntiAliasing(true);
+        options.setUseHighQualityRendering(true);
+        int pageCount = doc.getPageCount();
+        List<BufferedImage> imageList = new ArrayList<>();
+        for (int i = 0; i < pageCount; i++) {
+            OutputStream output = new ByteArrayOutputStream();
+            options.setPageIndex(i);
+            doc.save(output, options);
+            ImageInputStream imageInputStream = ImageIO.createImageInputStream(parse(output));
+            imageList.add(ImageIO.read(imageInputStream));
+        }
+        return imageList;
+    }
+
+    /**
+     * outputStream转inputStream
+     *
+     * @param out OutputStream
+     * @return inputStream
+     */
+    private static ByteArrayInputStream parse(OutputStream out) {
+        return new ByteArrayInputStream(((ByteArrayOutputStream) out).toByteArray());
     }
 
     /**
