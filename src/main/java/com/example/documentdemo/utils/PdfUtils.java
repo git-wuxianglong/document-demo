@@ -44,6 +44,12 @@ public class PdfUtils {
         log.info("PDF转HTML，耗时：{}", System.currentTimeMillis() - start);
     }
 
+    /**
+     * 多图片转pdf
+     *
+     * @param imagePathList 图片路径list
+     * @param outPath       pdf路径
+     */
     public static void imageToPdf(List<String> imagePathList, String outPath) {
         long start = System.currentTimeMillis();
         try (Document doc = new Document()) {

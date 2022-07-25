@@ -59,45 +59,6 @@ public class WordUtils {
     }
 
     /**
-     * html转word
-     *
-     * @param inPath  输入文件路径
-     * @param outPath 输出文件路径
-     * @throws Exception 操作异常
-     */
-    public static void htmlToWord(String inPath, String outPath) throws Exception {
-        Document wordDoc = new Document(inPath);
-        DocumentBuilder builder = new DocumentBuilder(wordDoc);
-        for (Field field : wordDoc.getRange().getFields()) {
-            if (field.getFieldCode().contains(FORM_TEXT)) {
-                // 去除掉文字型窗体域
-                builder.moveToField(field, true);
-                builder.write(field.getResult());
-                field.remove();
-            }
-        }
-        wordDoc.save(outPath, SaveFormat.DOCX);
-    }
-
-    /**
-     * html转word，并替换指定字段内容
-     *
-     * @param inPath  输入文件路径
-     * @param outPath 输出文件路径
-     * @throws Exception 操作异常
-     */
-    public static void htmlToWordAndReplaceField(String inPath, String outPath) throws Exception {
-        Document wordDoc = new Document(inPath);
-        Range range = wordDoc.getRange();
-        // 把张三替换成李四，把20替换成40
-        ImmutableMap<String, String> map = ImmutableMap.of("张三", "李四", "20", "40");
-        for (Map.Entry<String, String> str : map.entrySet()) {
-            range.replace(str.getKey(), str.getValue(), new FindReplaceOptions());
-        }
-        wordDoc.save(outPath, SaveFormat.DOCX);
-    }
-
-    /**
      * word转pdf
      *
      * @param inPath  输入文件路径
@@ -128,15 +89,6 @@ public class WordUtils {
         Document doc = new Document(inputStream);
         doc.save(os, SaveFormat.PDF);
         os.close();
-    }
-
-    public static FileOutputStream getFileOutputStream(String outPath) throws FileNotFoundException {
-        if (!System.getProperty(OS_NAME_STR).toLowerCase().startsWith(WINDOWS_STR)) {
-            // linux 需要配置字体库
-            log.info("【WordUtils -> docToPdf】linux字体库文件路径:{}", LINUX_FONTS_PATH);
-            FontSettings.getDefaultInstance().setFontsFolder(LINUX_FONTS_PATH, false);
-        }
-        return new FileOutputStream(outPath);
     }
 
     /**
@@ -180,6 +132,68 @@ public class WordUtils {
         inputStream.close();
     }
 
+    /**
+     * html转word
+     *
+     * @param inPath  输入文件路径
+     * @param outPath 输出文件路径
+     * @throws Exception 操作异常
+     */
+    public static void htmlToWord(String inPath, String outPath) throws Exception {
+        Document wordDoc = new Document(inPath);
+        DocumentBuilder builder = new DocumentBuilder(wordDoc);
+        for (Field field : wordDoc.getRange().getFields()) {
+            if (field.getFieldCode().contains(FORM_TEXT)) {
+                // 去除掉文字型窗体域
+                builder.moveToField(field, true);
+                builder.write(field.getResult());
+                field.remove();
+            }
+        }
+        wordDoc.save(outPath, SaveFormat.DOCX);
+    }
+
+    /**
+     * html转word，并替换指定字段内容
+     *
+     * @param inPath  输入文件路径
+     * @param outPath 输出文件路径
+     * @throws Exception 操作异常
+     */
+    public static void htmlToWordAndReplaceField(String inPath, String outPath) throws Exception {
+        Document wordDoc = new Document(inPath);
+        Range range = wordDoc.getRange();
+        // 把张三替换成李四，把20替换成40
+        ImmutableMap<String, String> map = ImmutableMap.of("张三", "李四", "20", "40");
+        for (Map.Entry<String, String> str : map.entrySet()) {
+            range.replace(str.getKey(), str.getValue(), new FindReplaceOptions());
+        }
+        wordDoc.save(outPath, SaveFormat.DOCX);
+    }
+
+    /**
+     * word转pdf，linux下设置字体库文件路径，并返回FileOutputStream
+     *
+     * @param outPath pdf输出路径
+     * @return pdf输出路径 -> FileOutputStream
+     * @throws FileNotFoundException FileNotFoundException
+     */
+    private static FileOutputStream getFileOutputStream(String outPath) throws FileNotFoundException {
+        if (!System.getProperty(OS_NAME_STR).toLowerCase().startsWith(WINDOWS_STR)) {
+            // linux 需要配置字体库
+            log.info("【WordUtils -> docToPdf】linux字体库文件路径:{}", LINUX_FONTS_PATH);
+            FontSettings.getDefaultInstance().setFontsFolder(LINUX_FONTS_PATH, false);
+        }
+        return new FileOutputStream(outPath);
+    }
+
+    /**
+     * word转图片
+     *
+     * @param inputStream word input stream
+     * @return BufferedImage list
+     * @throws Exception exception
+     */
     private static List<BufferedImage> wordToImg(InputStream inputStream) throws Exception {
         Document doc = new Document(inputStream);
         ImageSaveOptions options = new ImageSaveOptions(SaveFormat.PNG);
