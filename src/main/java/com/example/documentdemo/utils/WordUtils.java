@@ -34,8 +34,8 @@ public class WordUtils {
 
     public static void main(String[] args) throws Exception {
         checkLicense();
-        String inPath = "C:\\Users\\username\\Desktop\\test.docx";
-        String outPath = "C:\\Users\\username\\Desktop\\test.html";
+        String inPath = "C:\\test.docx";
+        String outPath = "C:\\test.pdf";
         docToPdf(inPath, outPath);
     }
 
