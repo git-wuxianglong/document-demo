@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage;
 import java.util.List;
 
 /**
- * 图片合同工具
+ * 图片合并工具
  *
  * @author wuxianglong
  */
