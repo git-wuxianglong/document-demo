@@ -19,7 +19,7 @@ public class MergeImage {
      */
     public static BufferedImage mergeImage(boolean isHorizontal, List<BufferedImage> images) {
         // 生成新图片
-        BufferedImage destImage = null;
+        BufferedImage destImage;
         // 计算新图片的长和高
         int allWidth = 0, allHeight = 0, allWidthMax = 0, allHeightMax = 0;
         // 获取总长、总宽、最长、最宽
@@ -67,6 +67,5 @@ public class MergeImage {
         }
         return destImage;
     }
-
 
 }

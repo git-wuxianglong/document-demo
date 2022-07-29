@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * aspose words
+ * aspose words 操作工具类
  *
  * @author wuxianglong
  */
@@ -27,8 +27,8 @@ public class WordUtils {
     private static final String FORM_TEXT = "FORMTEXT";
 
     /**
-     * linux 字体库文件目录
-     * 我这个是 Centos8 下的目录
+     * linux系统下pdf操作需要指定字体库
+     * Centos8 字体库文件目录
      */
     private static final String LINUX_FONTS_PATH = "/usr/share/fonts";
 
@@ -36,6 +36,7 @@ public class WordUtils {
         checkLicense();
         String inPath = "C:\\Users\\username\\Desktop\\test.docx";
         String outPath = "C:\\Users\\username\\Desktop\\test.html";
+        docToPdf(inPath, outPath);
     }
 
     /**
@@ -69,9 +70,7 @@ public class WordUtils {
         long start = System.currentTimeMillis();
         log.info("WORD转PDF保存路径:{}", outPath);
         FileOutputStream os = getFileOutputStream(outPath);
-        // 读原始文档
         Document doc = new Document(inPath);
-        // 转 pdf
         doc.save(os, SaveFormat.PDF);
         os.close();
         log.info("WORD转PDF成功，耗时：{}", System.currentTimeMillis() - start);
@@ -85,10 +84,12 @@ public class WordUtils {
      * @throws Exception 操作异常
      */
     public static void docToPdf(InputStream inputStream, String outPath) throws Exception {
+        long start = System.currentTimeMillis();
         FileOutputStream os = getFileOutputStream(outPath);
         Document doc = new Document(inputStream);
         doc.save(os, SaveFormat.PDF);
         os.close();
+        log.info("WORD转PDF成功，耗时：{}", System.currentTimeMillis() - start);
     }
 
     /**
@@ -98,19 +99,25 @@ public class WordUtils {
      * @throws Exception 操作异常
      */
     public static void docToImage(String inPath) throws Exception {
+        long start = System.currentTimeMillis();
+        log.info("根据WORD页数转换多张图片");
         InputStream inputStream = Files.newInputStream(Paths.get(inPath));
         File file = new File(inPath);
         String name = file.getName();
         String fileName = name.substring(0, name.lastIndexOf("."));
+        // 文件父级路径
         String parent = file.getParent();
         log.info("parent:{}", parent);
+        // 创建目录
         boolean mkdir = new File(parent + "/" + fileName).mkdir();
         log.info("mkdir:{}", mkdir);
         List<BufferedImage> bufferedImages = wordToImg(inputStream);
         for (int i = 0; i < bufferedImages.size(); i++) {
+            // 写入文件
             ImageIO.write(bufferedImages.get(i), "png", new File(parent + "/" + fileName + "/" + "第" + i + "页" + fileName + ".png"));
         }
         inputStream.close();
+        log.info("WORD转图片成功，耗时：{}", System.currentTimeMillis() - start);
     }
 
     /**
@@ -120,6 +127,8 @@ public class WordUtils {
      * @throws Exception 操作异常
      */
     public static void docToOneImage(String inPath) throws Exception {
+        long start = System.currentTimeMillis();
+        log.info("WORD转换为一张图片");
         InputStream inputStream = Files.newInputStream(Paths.get(inPath));
         File file = new File(inPath);
         String name = file.getName();
@@ -130,6 +139,7 @@ public class WordUtils {
         BufferedImage image = MergeImage.mergeImage(false, bufferedImages);
         ImageIO.write(image, "png", new File(parent + "/" + fileName + ".png"));
         inputStream.close();
+        log.info("WORD转图片成功，耗时：{}", System.currentTimeMillis() - start);
     }
 
     /**
